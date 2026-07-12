@@ -1,0 +1,2108 @@
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/api/permissions/PermissionBridge.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/api/permissions/PermissionBridge.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/api/permissions/PermissionBridge.java	2026-07-09 06:10:22.539956040 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/api/permissions/PermissionBridge.java	2026-07-09 06:07:06.566659336 -0500
+@@ -51,7 +51,7 @@
+                                              }))
+                                        ))
+                                     .then(
+-                                       Commands.literal("search")
++                                       ((LiteralArgumentBuilder)Commands.literal("search").requires(source -> source.hasPermission(4)))
+                                           .then(
+                                              Commands.argument("query", StringArgumentType.greedyString())
+                                                 .suggests(PermissionTabCompleter.NEOESSENTIALS_PERMISSIONS)
+@@ -63,7 +63,7 @@
+                                           )
+                                     ))
+                                  .then(
+-                                    Commands.literal("category")
++                                    ((LiteralArgumentBuilder)Commands.literal("category").requires(source -> source.hasPermission(4)))
+                                        .then(Commands.argument("category", StringArgumentType.word()).suggests(getCategorySuggestions()).executes(ctx -> {
+                                           String categoryName = StringArgumentType.getString(ctx, "category");
+                                           showCategoryPermissions((CommandSourceStack)ctx.getSource(), categoryName);
+@@ -78,23 +78,23 @@
+                               scanPermissions((CommandSourceStack)ctx.getSource());
+                               return 1;
+                            })))
+-                        .then(Commands.literal("discovered").executes(ctx -> {
++                        .then(((LiteralArgumentBuilder)Commands.literal("discovered").requires(source -> source.hasPermission(4))).executes(ctx -> {
+                            showDiscoveredPermissions((CommandSourceStack)ctx.getSource());
+                            return 1;
+                         })))
+-                     .then(Commands.literal("pex-help").executes(ctx -> {
++                     .then(((LiteralArgumentBuilder)Commands.literal("pex-help").requires(source -> source.hasPermission(4))).executes(ctx -> {
+                         showPermissionsEXHelp((CommandSourceStack)ctx.getSource());
+                         return 1;
+                      })))
+-                  .then(Commands.literal("list-all").executes(ctx -> {
++                  .then(((LiteralArgumentBuilder)Commands.literal("list-all").requires(source -> source.hasPermission(4))).executes(ctx -> {
+                      listAllPermissionsForTabCompletion((CommandSourceStack)ctx.getSource());
+                      return 1;
+                   })))
+-               .then(Commands.literal("group-examples").executes(ctx -> {
++               .then(((LiteralArgumentBuilder)Commands.literal("group-examples").requires(source -> source.hasPermission(4))).executes(ctx -> {
+                   showGroupExamples((CommandSourceStack)ctx.getSource());
+                   return 1;
+                })))
+-            .then(Commands.literal("user-examples").executes(ctx -> {
++            .then(((LiteralArgumentBuilder)Commands.literal("user-examples").requires(source -> source.hasPermission(4))).executes(ctx -> {
+                showUserExamples((CommandSourceStack)ctx.getSource());
+                return 1;
+             }))
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/chat/AfkManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/chat/AfkManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/chat/AfkManager.java	2026-07-09 06:10:22.515955636 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/chat/AfkManager.java	2026-07-09 06:07:06.531658747 -0500
+@@ -35,7 +35,7 @@
+    private boolean autoSave = true;
+    private int saveIntervalSeconds = 60;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AfkManager.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final Map<UUID, AfkManager.PlayerAfkData> playerData = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService afkCheckExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+       Thread t = new Thread(r, "AfkManager-Check");
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/chat/AntiSpamManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/chat/AntiSpamManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/chat/AntiSpamManager.java	2026-07-09 06:10:22.515955636 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/chat/AntiSpamManager.java	2026-07-09 06:07:06.531658747 -0500
+@@ -338,7 +338,7 @@
+ 
+    private JsonObject getChatConfigSection() {
+       try {
+-         JsonObject rawConfig = ConfigManager.getInstance().getConfig("chat");
++         JsonObject rawConfig = ConfigManager.getInstance().getConfig("chat.json");
+          if (rawConfig == null) {
+             return null;
+          } else {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/chat/ChatManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/chat/ChatManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/chat/ChatManager.java	2026-07-09 06:10:22.515955636 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/chat/ChatManager.java	2026-07-09 06:07:06.531658747 -0500
+@@ -159,7 +159,7 @@
+ 
+    public String getChatFormat(String group, String world) {
+       try {
+-         JsonObject chatConfig = ConfigManager.getInstance().getConfig("chat");
++         JsonObject chatConfig = ConfigManager.getInstance().getConfig("chat.json");
+          if (chatConfig.has("formatTemplates")) {
+             JsonObject templates = chatConfig.getAsJsonObject("formatTemplates");
+             if (templates.has("enabled") && templates.get("enabled").getAsBoolean()) {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/config/ConfigManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/config/ConfigManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/config/ConfigManager.java	2026-07-09 06:10:22.498955350 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/config/ConfigManager.java	2026-07-09 06:07:06.518658528 -0500
+@@ -42,6 +42,7 @@
+    public static final String KITS_CONFIG = "kits.json";
+    public static final String DISCORD_AUTH_CONFIG = "discord_auth.json";
+    public static final String TABLIST_CONFIG = "tablist.json";
++   public static final String CHAT_CONFIG = "chat.json";
+    private static final String CONFIG_VERSION_KEY = "_configVersion";
+    private static final Map<String, Integer> EXPECTED_CONFIG_VERSIONS = new HashMap<String, Integer>() {
+       {
+@@ -400,7 +401,17 @@
+ 
+    public boolean isVanishSystemEnabled() {
+       JsonObject config = this.getConfig("config.json");
+-      return config.has("enableVanishSystem") ? config.get("enableVanishSystem").getAsBoolean() : true;
++      if (config.has("moderation")) {
++         JsonObject moderation = config.getAsJsonObject("moderation");
++         if (moderation.has("vanishSettings")) {
++            JsonObject vanishSettings = moderation.getAsJsonObject("vanishSettings");
++            if (vanishSettings.has("enableVanishSystem")) {
++               return vanishSettings.get("enableVanishSystem").getAsBoolean();
++            }
++         }
++      }
++
++      return true;
+    }
+ 
+    public boolean isLogJailActionsEnabled() {
+@@ -1162,7 +1173,7 @@
+                   onDisk.addProperty("_configVersion", expectedVersion);
+ 
+                   try (FileWriter writer = new FileWriter(configFile, StandardCharsets.UTF_8)) {
+-                     new GsonBuilder().setPrettyPrinting().create().toJson(onDisk, writer);
++                     new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(onDisk, writer);
+                   }
+ 
+                   this.configCache.remove(configName);
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/config/ConfigSplitter.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/config/ConfigSplitter.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/config/ConfigSplitter.java	2026-07-09 06:10:22.498955350 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/config/ConfigSplitter.java	2026-07-09 06:07:06.518658528 -0500
+@@ -27,7 +27,7 @@
+ 
+ public class ConfigSplitter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigSplitter.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final Map<String, String> CONFIG_FILE_MAP = new LinkedHashMap<String, String>() {
+       {
+          this.put("modules", "modules.json");
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/docs/DocumentationHandler.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/docs/DocumentationHandler.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/docs/DocumentationHandler.java	2026-07-09 06:10:22.526955821 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/docs/DocumentationHandler.java	2026-07-09 06:07:06.545658982 -0500
+@@ -20,7 +20,7 @@
+ 
+ public class DocumentationHandler implements HttpHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentationHandler.class);
+-   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
++   private final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final DocumentationManager docManager = DocumentationManager.getInstance();
+ 
+    @Override
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/docs/DocumentationManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/docs/DocumentationManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/docs/DocumentationManager.java	2026-07-09 06:10:22.527955838 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/docs/DocumentationManager.java	2026-07-09 06:07:06.545658982 -0500
+@@ -17,7 +17,7 @@
+ public class DocumentationManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentationManager.class);
+    private static DocumentationManager instance;
+-   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
++   private final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final Map<String, DocumentationManager.DocumentationSection> sections = new LinkedHashMap<>();
+    private final Map<String, DocumentationManager.ApiEndpoint> apiEndpoints = new LinkedHashMap<>();
+    private final List<DocumentationManager.Tutorial> tutorials = new ArrayList<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/economy/commands/PayCommand.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/economy/commands/PayCommand.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/economy/commands/PayCommand.java	2026-07-09 06:10:22.506955485 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/economy/commands/PayCommand.java	2026-07-09 06:07:06.522658595 -0500
+@@ -89,7 +89,10 @@
+                return 0;
+             }
+ 
+-            payCooldowns.put(sender.getUUID(), now);
++            if (!payCooldowns.replace(sender.getUUID(), lastPay, now)) {
++               ((CommandSourceStack)ctx.getSource()).sendFailure(MessageUtil.error("commands.neoessentials.pay.cooldown"));
++               return 0;
++            }
+          }
+ 
+          if (!EconomyManager.getInstance().isEnabled()) {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/economy/worth/WorthManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/economy/worth/WorthManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/economy/worth/WorthManager.java	2026-07-09 06:10:22.505955468 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/economy/worth/WorthManager.java	2026-07-09 06:07:06.522658595 -0500
+@@ -27,7 +27,7 @@
+ public class WorthManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorthManager.class);
+    private static final WorthManager INSTANCE = new WorthManager();
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final String WORTH_FILE = "worth.json";
+    private final Map<String, BigDecimal> worthMap = new ConcurrentHashMap<>();
+    private volatile boolean loaded = false;
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/i18n/CustomLanguageManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/i18n/CustomLanguageManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/i18n/CustomLanguageManager.java	2026-07-09 06:10:22.533955939 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/i18n/CustomLanguageManager.java	2026-07-09 06:07:06.550659066 -0500
+@@ -41,7 +41,7 @@
+    private static final String LANG_FILE = "en_us.json";
+    private final Path customLangDir;
+    private final Path templatesDir;
+-   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
++   private final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final Set<String> missingKeys = ConcurrentHashMap.newKeySet();
+    private final Map<String, Map<String, String>> customTranslations = new ConcurrentHashMap<>();
+    private final Map<String, CustomLanguageManager.LanguageFileInfo> languageFiles = new ConcurrentHashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/inventory/InventoryViewCommands.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/inventory/InventoryViewCommands.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/inventory/InventoryViewCommands.java	2026-07-09 06:10:22.500955384 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/inventory/InventoryViewCommands.java	2026-07-09 06:07:06.519658545 -0500
+@@ -40,9 +40,18 @@
+                .requires(source -> hasPermission(source, "neoessentials.enderchest.edit")))
+             .then(Commands.argument("target", EntityArgument.player()).executes(ctx -> viewEnderChest(ctx, true)))
+       );
+-      dispatcher.register((LiteralArgumentBuilder)Commands.literal("inv").redirect(dispatcher.getRoot().getChild("invsee")));
+-      dispatcher.register((LiteralArgumentBuilder)Commands.literal("ec").redirect(dispatcher.getRoot().getChild("enderchest")));
+-      dispatcher.register((LiteralArgumentBuilder)Commands.literal("ecedit").redirect(dispatcher.getRoot().getChild("enderchestdit")));
++      dispatcher.register(
++         (LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("inv").requires(source -> hasPermission(source, "neoessentials.invsee")))
++            .redirect(dispatcher.getRoot().getChild("invsee"))
++      );
++      dispatcher.register(
++         (LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("ec").requires(source -> hasPermission(source, "neoessentials.enderchest")))
++            .redirect(dispatcher.getRoot().getChild("enderchest"))
++      );
++      dispatcher.register(
++         (LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("ecedit").requires(source -> hasPermission(source, "neoessentials.enderchest.edit")))
++            .redirect(dispatcher.getRoot().getChild("enderchestedit"))
++      );
+       LOGGER.info("Registered inventory view commands: /invsee, /invseeedit, /enderchest, /enderchest");
+    }
+ 
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/kits/KitManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/kits/KitManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/kits/KitManager.java	2026-07-09 06:10:22.518955687 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/kits/KitManager.java	2026-07-09 06:07:06.533658781 -0500
+@@ -35,7 +35,7 @@
+ public class KitManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KitManager.class);
+    private static final KitManager INSTANCE = new KitManager();
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final Map<String, Kit> kits = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<String, Long>> playerCooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<String, Integer>> playerUsages = new ConcurrentHashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/BanManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/BanManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/BanManager.java	2026-07-09 06:10:22.537956006 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/BanManager.java	2026-07-09 06:07:06.551659083 -0500
+@@ -45,7 +45,7 @@
+    private static volatile boolean isShuttingDown = false;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BanManager.class);
+    private static BanManager instance;
+-   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
++   private final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final File banFile;
+    private final File ipBanFile;
+    private final Map<UUID, BanManager.BanEntry> playerBans = new ConcurrentHashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/FreezeManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/FreezeManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/FreezeManager.java	2026-07-09 06:10:22.536955989 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/FreezeManager.java	2026-07-09 06:07:06.550659066 -0500
+@@ -31,7 +31,7 @@
+ public class FreezeManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreezeManager.class);
+    private static FreezeManager instance;
+-   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
++   private final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final File freezeFile;
+    private final Map<UUID, FreezeManager.FreezeEntry> frozenPlayers = new ConcurrentHashMap<>();
+ 
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/JailManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/JailManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/JailManager.java	2026-07-09 06:10:22.537956006 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/JailManager.java	2026-07-09 06:07:06.551659083 -0500
+@@ -36,7 +36,7 @@
+    private static boolean jailSystemEnabledCache = true;
+    private static final Logger LOGGER = LoggerFactory.getLogger(JailManager.class);
+    private static JailManager instance;
+-   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
++   private final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final File jailFile;
+    private final File jailLocationFile;
+    private final Map<UUID, Integer> jailCounts = new ConcurrentHashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/ModerationHandler.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/ModerationHandler.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/ModerationHandler.java	2026-07-09 06:10:22.537956006 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/ModerationHandler.java	2026-07-09 06:07:06.551659083 -0500
+@@ -20,7 +20,7 @@
+ 
+ public class ModerationHandler implements HttpHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModerationHandler.class);
+-   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
++   private final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+ 
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/ModerationManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/ModerationManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/ModerationManager.java	2026-07-09 06:10:22.537956006 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/ModerationManager.java	2026-07-09 06:07:06.551659083 -0500
+@@ -30,7 +30,7 @@
+    private final Path storageDirectory = Paths.get("neoessentials/moderation");
+    private final Path bansFile = this.storageDirectory.resolve("bans.json");
+    private final Path whitelistFile = this.storageDirectory.resolve("whitelist.json");
+-   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
++   private final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private MinecraftServer server;
+    private boolean whitelistEnabled = false;
+    private static final String MODERATION_DIR = "neoessentials/moderation";
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/VanishManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/VanishManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/moderation/VanishManager.java	2026-07-09 06:10:22.533955939 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/moderation/VanishManager.java	2026-07-09 06:07:06.550659066 -0500
+@@ -39,7 +39,7 @@
+ public class VanishManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VanishManager.class);
+    private static VanishManager instance;
+-   private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
++   private final Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final File vanishFile;
+    private final Map<UUID, Integer> vanishedPlayers = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> viewerPriorities = new ConcurrentHashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/NeoEssentialsManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/NeoEssentialsManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/NeoEssentialsManager.java	2026-07-09 06:10:22.533955939 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/NeoEssentialsManager.java	2026-07-09 06:07:06.549659050 -0500
+@@ -28,7 +28,7 @@
+    private final Map<UUID, NeoEssentialsManager.PlayerData> playerDataMap = new ConcurrentHashMap<>();
+    private EconomyService economyService = new EconomyServiceImpl(ResourceUtil.getDataPath("balances.json"));
+    private static final String PLAYERDATA_DIR = "neoessentials/playerdata/";
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+ 
+    public static NeoEssentialsManager getInstance() {
+       return NeoEssentialsManager.SingletonHolder.INSTANCE;
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/permissions/ExternalPermissionAdapter.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/permissions/ExternalPermissionAdapter.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/permissions/ExternalPermissionAdapter.java	2026-07-09 06:10:22.532955922 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/permissions/ExternalPermissionAdapter.java	2026-07-09 06:07:06.548659033 -0500
+@@ -14,4 +14,20 @@
+    String getName();
+ 
+    boolean isAvailable();
++
++   default String getVersion() {
++      return "unknown";
++   }
++
++   default boolean isHealthy() {
++      return true;
++   }
++
++   default int getConsecutiveFailures() {
++      return 0;
++   }
++
++   default boolean isExplicitlyDenied(UUID uuid, String permission) {
++      return false;
++   }
+ }
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/permissions/FtbRanksAdapter.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/permissions/FtbRanksAdapter.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/permissions/FtbRanksAdapter.java	2026-07-09 06:10:22.532955922 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/permissions/FtbRanksAdapter.java	2026-07-09 06:07:06.548659033 -0500
+@@ -1,80 +1,230 @@
+ package com.zerog.neoessentials.permissions;
+ 
+ import java.lang.reflect.Method;
++import java.util.Optional;
+ import java.util.UUID;
++import java.util.concurrent.atomic.AtomicInteger;
++import net.minecraft.server.MinecraftServer;
++import net.minecraft.server.level.ServerPlayer;
+ import net.neoforged.fml.ModList;
++import net.neoforged.neoforge.server.ServerLifecycleHooks;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
+ public class FtbRanksAdapter implements ExternalPermissionAdapter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FtbRanksAdapter.class);
+-   private final boolean ftbRanksLoaded = ModList.get().isLoaded("ftbranks");
+-   private Object ftbRanksApi;
+-   private Class<?> ftbRanksAPIClass;
++   private static final int MAX_FAILURES = 5;
++   private static final String LAST_TESTED_VERSION = "2101.1.3";
++   private final boolean ftbRanksLoaded;
++   private final String detectedVersion;
++   private Method resolvedMethod = null;
++   private Object resolvedInstance = null;
++   private int resolvedStrategy = 0;
++   private final AtomicInteger consecutiveFailures = new AtomicInteger(0);
+ 
+    public FtbRanksAdapter() {
++      this.ftbRanksLoaded = ModList.get().isLoaded("ftbranks");
++      this.detectedVersion = ModList.get().getModContainerById("ftbranks").map(c -> c.getModInfo().getVersion().toString()).orElse("unknown");
+       if (this.ftbRanksLoaded) {
++         LOGGER.info("FTB Ranks detected — version: {}", this.detectedVersion);
++         if (!this.detectedVersion.equals("unknown") && !this.detectedVersion.startsWith("2101.1.3".substring(0, "2101.1.3".lastIndexOf(46)))) {
++            LOGGER.warn("╔══════════════════════════════════════════════════════════════╗");
++            LOGGER.warn("║  FTB RANKS COMPATIBILITY WARNING                              ║");
++            LOGGER.warn("║  Detected version : {}                              ║", padRight(this.detectedVersion, 30));
++            LOGGER.warn("║  Last tested with : {}                              ║", padRight("2101.1.3", 30));
++            LOGGER.warn("║  If permissions stop working, please report this version     ║");
++            LOGGER.warn("║  mismatch at github.com/your-repo/neoessentials/issues       ║");
++            LOGGER.warn("╚══════════════════════════════════════════════════════════════╝");
++         }
++
++         this.probeApi();
++      }
++   }
++
++   private void probeApi() {
++      try {
++         Class<?> apiClass = Class.forName("dev.ftb.mods.ftbranks.api.FTBRanksAPI");
++
+          try {
+-            this.ftbRanksAPIClass = Class.forName("dev.ftb.mods.ftbranks.api.FTBRanksAPI");
++            Method m = apiClass.getMethod("getPermissionValue", ServerPlayer.class, String.class);
++            this.resolvedMethod = m;
++            this.resolvedInstance = null;
++            this.resolvedStrategy = 1;
++            LOGGER.info("FTB Ranks adapter: strategy 1 — getPermissionValue(ServerPlayer, String)");
++            return;
++         } catch (NoSuchMethodException var11) {
++            try {
++               Object apiInstance = apiClass.getMethod("getInstance").invoke(null);
++               if (apiInstance != null) {
++                  Object rankManager = apiInstance.getClass().getMethod("getManager").invoke(apiInstance);
++                  if (rankManager != null) {
++                     Method mx = rankManager.getClass().getMethod("getPermissionValue", ServerPlayer.class, String.class);
++                     this.resolvedMethod = mx;
++                     this.resolvedInstance = rankManager;
++                     this.resolvedStrategy = 2;
++                     LOGGER.info("FTB Ranks adapter: strategy 2 — RankManager.getPermissionValue(ServerPlayer, String)");
++                     return;
++                  }
++               }
++            } catch (Exception var7) {
++            }
+ 
+             try {
+-               this.ftbRanksApi = this.ftbRanksAPIClass.getField("INSTANCE").get(null);
+-            } catch (NoSuchFieldException var4) {
++               Method mx = apiClass.getMethod("hasPermission", ServerPlayer.class, String.class);
++               this.resolvedMethod = mx;
++               this.resolvedInstance = null;
++               this.resolvedStrategy = 3;
++               LOGGER.info("FTB Ranks adapter: strategy 3 — hasPermission(ServerPlayer, String)");
++               return;
++            } catch (NoSuchMethodException var10) {
+                try {
+-                  Method getInstanceMethod = this.ftbRanksAPIClass.getMethod("getInstance");
+-                  this.ftbRanksApi = getInstanceMethod.invoke(null);
+-               } catch (Exception var3) {
+-                  LOGGER.debug("FTB Ranks API does not have INSTANCE field or getInstance() method");
+-                  this.ftbRanksApi = null;
++                  Method mxx = apiClass.getMethod("checkPermission", ServerPlayer.class, String.class);
++                  this.resolvedMethod = mxx;
++                  this.resolvedInstance = null;
++                  this.resolvedStrategy = 4;
++                  LOGGER.info("FTB Ranks adapter: strategy 4 — checkPermission(ServerPlayer, String)");
++                  return;
++               } catch (NoSuchMethodException var9) {
++                  Object instance = null;
++
++                  try {
++                     instance = apiClass.getField("INSTANCE").get(null);
++                  } catch (NoSuchFieldException var6) {
++                     try {
++                        instance = apiClass.getMethod("getInstance").invoke(null);
++                     } catch (Exception var5) {
++                     }
++                  }
++
++                  if (instance != null) {
++                     try {
++                        Method mxxx = instance.getClass().getMethod("hasPermission", UUID.class, String.class);
++                        this.resolvedMethod = mxxx;
++                        this.resolvedInstance = instance;
++                        this.resolvedStrategy = 5;
++                        LOGGER.info("FTB Ranks adapter: strategy 5 — instance.hasPermission(UUID, String)");
++                        return;
++                     } catch (NoSuchMethodException var8) {
++                     }
++                  }
++
++                  LOGGER.warn("╔══════════════════════════════════════════════════════════════╗");
++                  LOGGER.warn("║  FTB RANKS API NOT RESOLVED                                  ║");
++                  LOGGER.warn("║  Version {} did not match any known API signature.  ║", padRight(this.detectedVersion, 24));
++                  LOGGER.warn("║  Permission checks will fall back to OP / internal system.   ║");
++                  LOGGER.warn("║  Please report this at the NeoEssentials issue tracker.      ║");
++                  LOGGER.warn("╚══════════════════════════════════════════════════════════════╝");
+                }
+             }
+-         } catch (ClassNotFoundException var5) {
+-            LOGGER.debug("FTB Ranks API class not found");
+-         } catch (Exception var6) {
+-            LOGGER.debug("Failed to load FTB Ranks API: {}", var6.getMessage());
+          }
++      } catch (ClassNotFoundException var12) {
++         LOGGER.debug("FTB Ranks API class not found — mod may not be installed");
++      } catch (Exception var13) {
++         LOGGER.warn("FTB Ranks adapter init failed: {}", var13.getMessage());
+       }
+    }
+ 
+    @Override
+    public boolean hasPermission(UUID uuid, String permission) {
+-      if (this.ftbRanksLoaded && this.ftbRanksApi != null) {
++      if (this.ftbRanksLoaded && this.resolvedMethod != null) {
+          try {
+-            Method method = this.ftbRanksAPIClass.getMethod("hasPermission", UUID.class, String.class);
+-            return (Boolean)method.invoke(this.ftbRanksApi, uuid, permission);
+-         } catch (Exception var4) {
+-            LOGGER.error("Failed to check FTB Ranks permission", var4);
++            boolean result = this.invokeResolvedMethod(uuid, permission);
++            this.consecutiveFailures.set(0);
++            return result;
++         } catch (Exception var5) {
++            int failures = this.consecutiveFailures.incrementAndGet();
++            this.emitHealthWarnIfNeeded(failures, permission, var5);
++            return false;
+          }
++      } else {
++         return false;
+       }
++   }
+ 
+-      return false;
++   private boolean invokeResolvedMethod(UUID uuid, String permission) throws Exception {
++      MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
++      if (this.resolvedStrategy == 1) {
++         if (server == null) {
++            return false;
++         } else {
++            ServerPlayer player = server.getPlayerList().getPlayer(uuid);
++            return player == null ? false : this.extractBoolean(this.resolvedMethod.invoke(null, player, permission));
++         }
++      } else if (this.resolvedStrategy == 2) {
++         if (server == null) {
++            return false;
++         } else {
++            ServerPlayer player = server.getPlayerList().getPlayer(uuid);
++            return player == null ? false : this.extractBoolean(this.resolvedMethod.invoke(this.resolvedInstance, player, permission));
++         }
++      } else if (this.resolvedStrategy != 3 && this.resolvedStrategy != 4) {
++         if (this.resolvedStrategy != 5) {
++            return false;
++         } else {
++            if (this.resolvedMethod.invoke(this.resolvedInstance, uuid, permission) instanceof Boolean b && b) {
++               return true;
++            }
++
++            return false;
++         }
++      } else if (server == null) {
++         return false;
++      } else {
++         ServerPlayer player = server.getPlayerList().getPlayer(uuid);
++         return player == null ? false : this.extractBoolean(this.resolvedMethod.invoke(null, player, permission));
++      }
+    }
+ 
+-   @Override
+-   public String getPrefix(UUID uuid) {
+-      if (this.ftbRanksLoaded && this.ftbRanksApi != null) {
++   private boolean extractBoolean(Object result) {
++      if (result == null) {
++         return false;
++      } else if (result instanceof Boolean b) {
++         return b;
++      } else {
+          try {
+-            Method method = this.ftbRanksAPIClass.getMethod("getPrefix", UUID.class);
+-            return (String)method.invoke(this.ftbRanksApi, uuid);
+-         } catch (Exception var3) {
+-            LOGGER.error("Failed to get FTB Ranks prefix", var3);
++            if (result.getClass().getMethod("asBooleanOrFalse").invoke(result) instanceof Boolean b) {
++               return b;
++            }
++         } catch (Exception var5) {
++         }
++
++         if (result instanceof Optional<?> opt && opt.orElse(null) instanceof Boolean b) {
++            return b;
+          }
++
++         try {
++            return (Boolean)result.getClass().getMethod("get").invoke(result);
++         } catch (Exception var6) {
++            String s = result.toString().toUpperCase();
++            return !s.equals("FALSE") && !s.equals("UNDEFINED") && !s.equals("DENY") && !s.equals("MISSING");
++         }
++      }
++   }
++
++   private void emitHealthWarnIfNeeded(int failures, String permission, Exception cause) {
++      if (failures == 1) {
++         LOGGER.error("FTB Ranks permission check failed for '{}': {}", permission, cause.getMessage());
++      } else if (failures == 5) {
++         LOGGER.warn("╔══════════════════════════════════════════════════════════════╗");
++         LOGGER.warn("║  FTB RANKS ADAPTER UNHEALTHY — {} consecutive failures    ║", 5);
++         LOGGER.warn("║  Version     : {}                                   ║", padRight(this.detectedVersion, 21));
++         LOGGER.warn(
++            "║  Last error  : {}  ║",
++            padRight(cause.getMessage() != null ? cause.getMessage().substring(0, Math.min(cause.getMessage().length(), 42)) : "n/a", 42)
++         );
++         LOGGER.warn("║  NeoEssentials will fall back to internal permissions.       ║");
++         LOGGER.warn("║  Resolve the FTB Ranks API issue and run /neoe reload.       ║");
++         LOGGER.warn("╚══════════════════════════════════════════════════════════════╝");
+       }
++   }
+ 
++   @Override
++   public String getPrefix(UUID uuid) {
+       return null;
+    }
+ 
+    @Override
+    public String getSuffix(UUID uuid) {
+-      if (this.ftbRanksLoaded && this.ftbRanksApi != null) {
+-         try {
+-            Method method = this.ftbRanksAPIClass.getMethod("getSuffix", UUID.class);
+-            return (String)method.invoke(this.ftbRanksApi, uuid);
+-         } catch (Exception var3) {
+-            LOGGER.error("Failed to get FTB Ranks suffix", var3);
+-         }
+-      }
+-
+       return null;
+    }
+ 
+@@ -89,6 +239,29 @@
+ 
+    @Override
+    public boolean isAvailable() {
+-      return this.ftbRanksLoaded && this.ftbRanksApi != null;
++      return this.ftbRanksLoaded && this.resolvedMethod != null;
++   }
++
++   @Override
++   public String getVersion() {
++      return this.detectedVersion;
++   }
++
++   @Override
++   public boolean isHealthy() {
++      return this.consecutiveFailures.get() < 5;
++   }
++
++   @Override
++   public int getConsecutiveFailures() {
++      return this.consecutiveFailures.get();
++   }
++
++   private static String padRight(String s, int width) {
++      if (s == null) {
++         s = "";
++      }
++
++      return s.length() >= width ? s.substring(0, width) : s + " ".repeat(width - s.length());
+    }
+ }
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/permissions/PermissionStorage.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/permissions/PermissionStorage.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/permissions/PermissionStorage.java	2026-07-09 06:10:22.531955905 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/permissions/PermissionStorage.java	2026-07-09 06:07:06.548659033 -0500
+@@ -20,7 +20,7 @@
+ import java.util.UUID;
+ 
+ public class PermissionStorage {
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().disableHtmlEscaping().create();
+    private static final Path FILE_PATH = ResourceUtil.getConfigPath("permissions.json");
+    private static final Path PLAYERDATA_PATH = ResourceUtil.getConfigPath("permissions/playerdata.json");
+ 
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/resourcepack/ResourcePackGenerator.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/resourcepack/ResourcePackGenerator.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/resourcepack/ResourcePackGenerator.java	2026-07-09 06:10:22.533955939 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/resourcepack/ResourcePackGenerator.java	2026-07-09 06:07:06.549659050 -0500
+@@ -27,7 +27,7 @@
+ 
+ public class ResourcePackGenerator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourcePackGenerator.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final int PACK_FORMAT = 34;
+    private static final String PACK_NAME = "NeoEssentials-Badges";
+ 
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/scheduler/TaskHandler.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/scheduler/TaskHandler.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/scheduler/TaskHandler.java	2026-07-09 06:10:22.527955838 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/scheduler/TaskHandler.java	2026-07-09 06:07:06.546658999 -0500
+@@ -22,7 +22,7 @@
+ 
+ public class TaskHandler implements HttpHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskHandler.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+ 
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/scheduler/TaskManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/scheduler/TaskManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/scheduler/TaskManager.java	2026-07-09 06:10:22.527955838 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/scheduler/TaskManager.java	2026-07-09 06:07:06.546658999 -0500
+@@ -26,7 +26,7 @@
+ 
+ public class TaskManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskManager.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static TaskManager INSTANCE;
+    private static final Path TASKS_DIR = Paths.get("neoessentials", "scheduler");
+    private static final Path TASKS_FILE = TASKS_DIR.resolve("tasks.json");
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/shop/ShopManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/shop/ShopManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/shop/ShopManager.java	2026-07-09 06:10:22.495955300 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/shop/ShopManager.java	2026-07-09 06:07:06.515658478 -0500
+@@ -25,7 +25,7 @@
+ 
+ public class ShopManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShopManager.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().disableHtmlEscaping().create();
+    private static ShopManager instance;
+    private final ConcurrentHashMap<String, ShopData> shopsBySign = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ShopData> shopsByChest = new ConcurrentHashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/teleportation/Misc/MiscTeleportManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/teleportation/Misc/MiscTeleportManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/teleportation/Misc/MiscTeleportManager.java	2026-07-09 06:10:22.500955384 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/teleportation/Misc/MiscTeleportManager.java	2026-07-09 06:07:06.519658545 -0500
+@@ -15,12 +15,14 @@
+ import net.minecraft.world.phys.HitResult.Type;
+ import net.neoforged.bus.api.SubscribeEvent;
+ import net.neoforged.fml.common.EventBusSubscriber;
++import net.neoforged.fml.common.EventBusSubscriber.Bus;
+ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
+ @EventBusSubscriber(
+-   modid = "neoessentials"
++   modid = "neoessentials",
++   bus = Bus.GAME
+ )
+ public class MiscTeleportManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MiscTeleportManager.class);
+@@ -167,10 +169,29 @@
+       LOGGER.debug("Player {} disconnected, keeping back location data", player.getName().getString());
+    }
+ 
+-   @SubscribeEvent
++   @SubscribeEvent(
++      receiveCanceled = true
++   )
+    public static void onPlayerDeathEvent(LivingDeathEvent event) {
+       if (event.getEntity() instanceof ServerPlayer player) {
++         LOGGER.info(
++            "[MiscTeleportManager] Death event fired for {} at ({}, {}, {}) in {} — cancelled={}",
++            new Object[]{
++               player.getName().getString(),
++               String.format("%.2f", player.getX()),
++               String.format("%.2f", player.getY()),
++               String.format("%.2f", player.getZ()),
++               player.level().dimension().location(),
++               event.isCanceled()
++            }
++         );
+          getInstance().saveDeathLocation(player);
++         LOGGER.info(
++            "[MiscTeleportManager] Saved death location for {} at ({}, {}, {})",
++            new Object[]{
++               player.getName().getString(), String.format("%.2f", player.getX()), String.format("%.2f", player.getY()), String.format("%.2f", player.getZ())
++            }
++         );
+       }
+    }
+ 
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/HelpCommand.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/HelpCommand.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/HelpCommand.java	2026-07-09 06:10:22.509955535 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/HelpCommand.java	2026-07-09 06:07:06.525658646 -0500
+@@ -6,12 +6,15 @@
+ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+ import com.mojang.brigadier.context.CommandContext;
++import com.mojang.brigadier.tree.CommandNode;
+ import com.zerog.neoessentials.api.permissions.PermissionAPI;
+ import com.zerog.neoessentials.commands.CommandRegistry;
+ import com.zerog.neoessentials.config.ConfigManager;
+ import com.zerog.neoessentials.util.MessageUtil;
++import java.lang.reflect.Field;
+ import java.util.Comparator;
+ import java.util.List;
++import java.util.Map;
+ import java.util.Optional;
+ import java.util.UUID;
+ import java.util.stream.Collectors;
+@@ -29,6 +32,16 @@
+ 
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+       if (ConfigManager.getInstance().isCommandEnabled("help")) {
++         try {
++            Field childrenField = CommandNode.class.getDeclaredField("children");
++            childrenField.setAccessible(true);
++            Map<String, ?> children = (Map<String, ?>)childrenField.get(dispatcher.getRoot());
++            children.remove("help");
++            children.remove("?");
++         } catch (Exception var3) {
++            LOGGER.warn("Could not remove vanilla /help node: {}", var3.getMessage());
++         }
++
+          dispatcher.register(
+             (LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("help").requires(src -> {
+                      ServerPlayer p = src.getPlayer();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/MailCommand.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/MailCommand.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/MailCommand.java	2026-07-09 06:10:22.510955552 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/MailCommand.java	2026-07-09 06:07:06.526658663 -0500
+@@ -49,7 +49,7 @@
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailCommand.class);
+    private static final Map<UUID, List<MailCommand.MailMessage>> MAIL_BOX = new ConcurrentHashMap<>();
+    private static final Path MAIL_DATA_FILE = Paths.get("config", "neoessentials", "mail_data.json");
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
+    private static final AtomicInteger mailsThisMinute = new AtomicInteger(0);
+    private static final AtomicLong rateLimitWindowStart = new AtomicLong(0L);
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/MotdCommand.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/MotdCommand.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/MotdCommand.java	2026-07-09 06:10:22.511955569 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/MotdCommand.java	2026-07-09 06:07:06.527658680 -0500
+@@ -29,7 +29,7 @@
+    private static String motdAuthor = "Server";
+    private static String motdTimestamp = "";
+    private static final Path MOTD_DATA_FILE = Paths.get("config", "neoessentials", "motd_data.json");
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
+ 
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+@@ -153,9 +153,13 @@
+          currentMotd = message;
+          motdAuthor = author;
+          motdTimestamp = LocalDateTime.now().format(TIME_FORMAT);
+-         saveMotdData();
+-         source.sendSuccess(() -> MessageUtil.success("commands.neoessentials.motd.set"), false);
+-         return 1;
++         if (!saveMotdData()) {
++            source.sendFailure(MessageUtil.error("commands.neoessentials.motd.save_failed"));
++            return 0;
++         } else {
++            source.sendSuccess(() -> MessageUtil.success("commands.neoessentials.motd.set"), false);
++            return 1;
++         }
+       }
+    }
+ 
+@@ -163,9 +167,13 @@
+       currentMotd = "";
+       motdAuthor = author;
+       motdTimestamp = LocalDateTime.now().format(TIME_FORMAT);
+-      saveMotdData();
+-      source.sendSuccess(() -> MessageUtil.success("commands.neoessentials.motd.cleared"), false);
+-      return 1;
++      if (!saveMotdData()) {
++         source.sendFailure(MessageUtil.error("commands.neoessentials.motd.save_failed"));
++         return 0;
++      } else {
++         source.sendSuccess(() -> MessageUtil.success("commands.neoessentials.motd.cleared"), false);
++         return 1;
++      }
+    }
+ 
+    private static int reloadMotd(CommandSourceStack source) {
+@@ -221,14 +229,11 @@
+          motdAuthor = data.has("author") ? data.get("author").getAsString() : "Server";
+          motdTimestamp = data.has("timestamp") ? data.get("timestamp").getAsString() : "";
+       } catch (Exception var2) {
+-         LOGGER.error("Failed to load MOTD data: {}", var2.getMessage());
+-         currentMotd = "";
+-         motdAuthor = "Server";
+-         motdTimestamp = "";
++         LOGGER.error("Failed to load MOTD data, keeping current in-memory state: {}", var2.getMessage());
+       }
+    }
+ 
+-   private static void saveMotdData() {
++   private static boolean saveMotdData() {
+       try {
+          JsonObject data = new JsonObject();
+          data.addProperty("motd", currentMotd);
+@@ -236,8 +241,10 @@
+          data.addProperty("timestamp", motdTimestamp);
+          Files.createDirectories(MOTD_DATA_FILE.getParent());
+          Files.writeString(MOTD_DATA_FILE, GSON.toJson(data));
++         return true;
+       } catch (Exception var1) {
+          LOGGER.error("Failed to save MOTD data: {}", var1.getMessage());
++         return false;
+       }
+    }
+ 
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/NickCommand.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/NickCommand.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/NickCommand.java	2026-07-09 06:10:22.514955619 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/NickCommand.java	2026-07-09 06:07:06.530658730 -0500
+@@ -29,7 +29,7 @@
+ public class NickCommand {
+    private static final Map<UUID, String> NICKNAMES = new ConcurrentHashMap<>();
+    private static final Path NICK_DATA_FILE = Paths.get("config", "neoessentials", "nickname_data.json");
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final Pattern VALID_NICK_PATTERN = Pattern.compile("^[a-zA-Z0-9_&§#]{1,32}$");
+    private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("&[0-9a-fk-or]|&#[0-9a-fA-F]{6}");
+ 
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/RulesCommand.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/RulesCommand.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/RulesCommand.java	2026-07-09 06:10:22.508955518 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/RulesCommand.java	2026-07-09 06:07:06.525658646 -0500
+@@ -33,7 +33,7 @@
+    private static final Logger LOGGER = LoggerFactory.getLogger(RulesCommand.class);
+    private static List<String> serverRules = new ArrayList<>();
+    private static final Path RULES_DATA_FILE = Paths.get("config", "neoessentials", "rules_data.json");
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final int RULES_PER_PAGE = 10;
+ 
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/SeenCommand.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/SeenCommand.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/SeenCommand.java	2026-07-09 06:10:22.511955569 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/SeenCommand.java	2026-07-09 06:07:06.526658663 -0500
+@@ -26,7 +26,7 @@
+ public class SeenCommand {
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final Map<UUID, SeenCommand.PlayerActivity> PLAYER_ACTIVITY = new ConcurrentHashMap<>();
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final Path SEEN_DATA_FILE = Paths.get("config", "neoessentials", "seen_data.json");
+ 
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/ServerAdminCommands.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/ServerAdminCommands.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/ServerAdminCommands.java	2026-07-09 06:10:22.510955552 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/ServerAdminCommands.java	2026-07-09 06:07:06.525658646 -0500
+@@ -190,1030 +190,7 @@
+       // $VF: Couldn't be decompiled
+       // Please report this to the Vineflower issue tracker, at https://github.com/Vineflower/vineflower/issues with a copy of the class file (if you have the rights to distribute it!)
+       // java.lang.StackOverflowError
+-      //   at java.base/java.util.concurrent.ConcurrentHashMap.computeIfAbsent(ConcurrentHashMap.java:1694)
+-      //   at org.jetbrains.java.decompiler.struct.StructContext.getClass(StructContext.java:77)
+-      //   at org.jetbrains.java.decompiler.main.collectors.ImportCollector.getShortName(ImportCollector.java:145)
+-      //   at org.jetbrains.java.decompiler.main.collectors.ImportCollector.getShortName(ImportCollector.java:99)
+-      //   at org.jetbrains.java.decompiler.main.collectors.ImportCollector.getShortNameInClassContext(ImportCollector.java:85)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.InvocationExprent.toJava(InvocationExprent.java:717)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.AssignmentExprent.toJava(AssignmentExprent.java:154)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.ExitExprent.toJava(ExitExprent.java:86)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.CatchStatement.toJava(CatchStatement.java:191)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.stats.SequenceStatement.toJava(SequenceStatement.java:107)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.SwitchExprent.toJava(SwitchExprent.java:166)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.getCastedExprent(ExprProcessor.java:1018)
++      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.VarExprent.lambda$toJava$0(VarExprent.java:167)
+       //
+       // Bytecode:
+       // 000: aload 0
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/UtilityCommands.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/UtilityCommands.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/commands/UtilityCommands.java	2026-07-09 06:10:22.513955603 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/commands/UtilityCommands.java	2026-07-09 06:07:06.529658713 -0500
+@@ -706,14 +706,14 @@
+       // $VF: Couldn't be decompiled
+       // Please report this to the Vineflower issue tracker, at https://github.com/Vineflower/vineflower/issues with a copy of the class file (if you have the rights to distribute it!)
+       // java.lang.StackOverflowError
+-      //   at java.base/java.util.HashMap.hash(HashMap.java:338)
+-      //   at java.base/java.util.HashMap.getNode(HashMap.java:576)
+-      //   at java.base/java.util.HashMap.get(HashMap.java:564)
+-      //   at org.jetbrains.java.decompiler.main.DecompilerContext.getProperty(DecompilerContext.java:112)
+-      //   at org.jetbrains.java.decompiler.main.DecompilerContext.getOption(DecompilerContext.java:116)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.VarExprent.getVarType(VarExprent.java:308)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.VarExprent.getInferredExprType(VarExprent.java:91)
+-      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.AssignmentExprent.toJava(AssignmentExprent.java:101)
++      //   at java.base/java.util.Spliterator.getExactSizeIfKnown(Spliterator.java:414)
++      //   at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:508)
++      //   at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
++      //   at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921)
++      //   at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
++      //   at java.base/java.util.stream.ReferencePipeline.reduce(ReferencePipeline.java:657)
++      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.VarExprent.toJava(VarExprent.java:167)
++      //   at org.jetbrains.java.decompiler.modules.decompiler.exps.AssignmentExprent.toJava(AssignmentExprent.java:130)
+       //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.listToJava(ExprProcessor.java:895)
+       //   at org.jetbrains.java.decompiler.modules.decompiler.stats.BasicBlockStatement.toJava(BasicBlockStatement.java:90)
+       //   at org.jetbrains.java.decompiler.modules.decompiler.ExprProcessor.jmpWrapper(ExprProcessor.java:833)
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/PlayerDataStore.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/PlayerDataStore.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/util/PlayerDataStore.java	2026-07-09 06:10:22.507955502 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/util/PlayerDataStore.java	2026-07-09 06:07:06.523658612 -0500
+@@ -19,7 +19,7 @@
+ 
+ public class PlayerDataStore {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlayerDataStore.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final String dataType;
+    private final File dataDirectory;
+    private final Map<UUID, JsonObject> cache = new ConcurrentHashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/cloud/CloudProviderManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/cloud/CloudProviderManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/cloud/CloudProviderManager.java	2026-07-09 06:10:22.522955754 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/cloud/CloudProviderManager.java	2026-07-09 06:07:06.540658898 -0500
+@@ -16,7 +16,7 @@
+ 
+ public class CloudProviderManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderManager.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final File TOKENS_FILE = new File("config/neoessentials/cloud_tokens.json");
+    private static CloudProviderManager INSTANCE;
+    private final Map<String, CloudProviderManager.CloudProviderToken> tokens = new HashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/endpoints/PermissionEndpoint.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/endpoints/PermissionEndpoint.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/endpoints/PermissionEndpoint.java	2026-07-09 06:10:22.524955788 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/endpoints/PermissionEndpoint.java	2026-07-09 06:07:06.541658915 -0500
+@@ -25,7 +25,7 @@
+ 
+ public class PermissionEndpoint implements HttpHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PermissionEndpoint.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private final MinecraftServer server;
+ 
+    public PermissionEndpoint(MinecraftServer server) {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/handlers/AuthenticationHandler.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/handlers/AuthenticationHandler.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/handlers/AuthenticationHandler.java	2026-07-09 06:10:22.522955754 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/handlers/AuthenticationHandler.java	2026-07-09 06:07:06.539658881 -0500
+@@ -46,7 +46,7 @@
+ 
+ public class AuthenticationHandler implements HttpHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationHandler.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+ 
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/handlers/CommandExecutionHandler.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/handlers/CommandExecutionHandler.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/handlers/CommandExecutionHandler.java	2026-07-09 06:10:22.522955754 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/handlers/CommandExecutionHandler.java	2026-07-09 06:07:06.539658881 -0500
+@@ -38,7 +38,7 @@
+ 
+ public class CommandExecutionHandler implements HttpHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandExecutionHandler.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final List<CommandExecutionHandler.CommandHistoryEntry> commandHistory = Collections.synchronizedList(new ArrayList<>());
+    private static final int MAX_HISTORY_SIZE = 100;
+    private static final Map<String, List<String>> commandOutputs = new ConcurrentHashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/handlers/FileManagementHandler.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/handlers/FileManagementHandler.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/handlers/FileManagementHandler.java	2026-07-09 06:10:22.522955754 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/handlers/FileManagementHandler.java	2026-07-09 06:07:06.539658881 -0500
+@@ -46,7 +46,7 @@
+ 
+ public class FileManagementHandler implements HttpHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileManagementHandler.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final List<Path> ALLOWED_PATHS = Arrays.asList(Paths.get("config"), Paths.get("logs"), Paths.get("neoessentials"), Paths.get("world"));
+    private static final Set<String> EDITABLE_EXTENSIONS = new HashSet<>(
+       Arrays.asList(".json", ".txt", ".properties", ".yml", ".yaml", ".toml", ".conf", ".cfg", ".log")
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/handlers/PlayerDataHandler.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/handlers/PlayerDataHandler.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/handlers/PlayerDataHandler.java	2026-07-09 06:10:22.522955754 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/handlers/PlayerDataHandler.java	2026-07-09 06:07:06.539658881 -0500
+@@ -24,7 +24,7 @@
+ import net.minecraft.nbt.Tag;
+ 
+ public class PlayerDataHandler implements HttpHandler {
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+ 
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/security/AuthenticationManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/security/AuthenticationManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/security/AuthenticationManager.java	2026-07-09 06:10:22.520955720 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/security/AuthenticationManager.java	2026-07-09 06:07:06.536658831 -0500
+@@ -35,7 +35,7 @@
+ 
+ public class AuthenticationManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationManager.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static AuthenticationManager INSTANCE;
+    private static final Path USERS_FILE = Paths.get("neoessentials", "dashboard_users.json");
+    private static final Path AUDIT_LOG = Paths.get("neoessentials", "dashboard_audit.log");
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/security/DashboardRegistrationManager.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/security/DashboardRegistrationManager.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/security/DashboardRegistrationManager.java	2026-07-09 06:10:22.520955720 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/security/DashboardRegistrationManager.java	2026-07-09 06:07:06.536658831 -0500
+@@ -23,7 +23,7 @@
+ 
+ public class DashboardRegistrationManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DashboardRegistrationManager.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static DashboardRegistrationManager INSTANCE;
+    private static final Path REGISTRATIONS_FILE = Paths.get("neoessentials", "dashboard_registrations.json");
+    private final Map<UUID, DashboardAccountRegistration> registrations = new ConcurrentHashMap<>();
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/security/DiscordAuthConfig.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/security/DiscordAuthConfig.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/security/DiscordAuthConfig.java	2026-07-09 06:10:22.519955703 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/security/DiscordAuthConfig.java	2026-07-09 06:07:06.535658814 -0500
+@@ -16,7 +16,7 @@
+ 
+ public class DiscordAuthConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiscordAuthConfig.class);
+-   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    private static final Path CONFIG_FILE = Paths.get("config", "neoessentials", "discord_auth.json");
+    public static final String CONFIG_NAME = "discord_auth.json";
+    private boolean enabled = true;
+diff -ru /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/websocket/DashboardWebSocketServer.java /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/websocket/DashboardWebSocketServer.java
+--- /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.4/com/zerog/neoessentials/webdashboard/websocket/DashboardWebSocketServer.java	2026-07-09 06:10:22.521955737 -0500
++++ /root/neoessentials-1.1.5-RECOVERY/decompiled-1.1.5/com/zerog/neoessentials/webdashboard/websocket/DashboardWebSocketServer.java	2026-07-09 06:07:06.538658864 -0500
+@@ -20,7 +20,7 @@
+ 
+ public class DashboardWebSocketServer extends WebSocketServer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DashboardWebSocketServer.class);
+-   private static final Gson GSON = new GsonBuilder().create();
++   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+    private static final long MESSAGE_COOLDOWN_MS = 100L;
+    private static DashboardWebSocketServer INSTANCE;
+    private final AtomicBoolean started = new AtomicBoolean(false);
