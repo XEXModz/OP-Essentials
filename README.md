@@ -14,6 +14,8 @@ Everything in here exists because our own server needed it. The mod runs in
 production on a public All The Mods 10 server, which is where most of the bug
 fixes in the changelog come from.
 
+See [COMMANDS.md](COMMANDS.md) for the full command reference.
+
 ## Features
 
 ### Vanish
