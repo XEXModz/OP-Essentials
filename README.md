@@ -4,6 +4,7 @@
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)
 ![NeoForge](https://img.shields.io/badge/NeoForge-21.1.234-orange)
 ![Side](https://img.shields.io/badge/side-server--only-purple)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 Essentials-style server utilities for NeoForge: vanish, permission groups, homes,
 warps, teleports, moderation, chat formatting, kits and more. Server-side only —
@@ -82,6 +83,7 @@ OP-Essentials started as a fork of NeoEssentials by ZeroG Network and has since
 diverged heavily (see [CHANGELOG.md](CHANGELOG.md)). Internal ids still use the
 `neoessentials` namespace; the full rename will land before any public release.
 
-Note: before this repository goes public, the upstream license needs to be
-reviewed, since parts of the codebase derive from the original NeoEssentials
-sources.
+## License
+
+MIT, same as upstream. See [LICENSE](LICENSE) — the original NeoEssentials
+copyright (ZeroG Network) is preserved alongside the OP-Essentials changes.
