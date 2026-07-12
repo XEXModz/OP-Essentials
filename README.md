@@ -81,7 +81,7 @@ the per-version change history.
 
 OP-Essentials started as a fork of NeoEssentials by ZeroG Network and has since
 diverged heavily (see [CHANGELOG.md](CHANGELOG.md)). Internal ids still use the
-`neoessentials` namespace; the full rename will land before any public release.
+`neoessentials` namespace; the full rename is planned for an upcoming release.
 
 ## License
 
