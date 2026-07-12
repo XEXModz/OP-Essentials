@@ -5,7 +5,6 @@ Identical code to lineage release `neoessentials-1.1.12-beta` — the version ru
 in production. From here the mod is its own project: **OP-Essentials**.
 
 ### Known issues (queued for v0.2)
-- `AfkManager.reload()` is a no-op stub — afk.json edits need a server restart
 - `/god` should be removed (collides with FTB Essentials' `/god` when both installed)
 - Boot banner prints a stale hardcoded version string
 - Full `neoessentials` → `opessentials` id/package rename pending
