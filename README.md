@@ -1,86 +1,87 @@
-# ⚡ OP-Essentials
+# OP-Essentials
 
 ![Version](https://img.shields.io/badge/version-0.1--beta-blue)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)
 ![NeoForge](https://img.shields.io/badge/NeoForge-21.1.234-orange)
 ![Side](https://img.shields.io/badge/side-server--only-purple)
-![Status](https://img.shields.io/badge/status-private%20beta-red)
 
-**The all-in-one essentials mod for NeoForge servers — built for real SMPs, battle-tested on a live All The Mods 10 server.**
+Essentials-style server utilities for NeoForge: vanish, permission groups, homes,
+warps, teleports, moderation, chat formatting, kits and more. Server-side only —
+players connect with a completely vanilla client.
 
-Every feature in this mod exists because a real server needed it. Vanish that actually
-makes you invisible. Permission groups that actually apply. A tablist that doesn't dance.
+Everything in here exists because our own server needed it. The mod runs in
+production on a public All The Mods 10 server, which is where most of the bug
+fixes in the changelog come from.
 
----
+## Features
 
-## ✨ Features
+### Vanish
+- Removes you from the tab list, entity tracking and minimaps — no footsteps,
+  no sounds, no radar dot
+- Staff can always see other vanished staff (priority-based, no toggles needed)
+- Optional fake leave/join messages on vanish/unvanish
+- Teleports while vanished are silent: no chat broadcast, no sound, no particles
+- Handles the login race, so players who join while you are vanished still
+  cannot see you
 
-### 👻 Vanish that actually works
-- **True invisibility** — removed from tab, radar/minimap, entity tracking; no footsteps, no sounds
-- **Staff always see vanished staff** — priority-based (Owner ⟷ Co-Owner ⟷ Admin), automatic, no toggles
-- **Fake leave/join messages** on vanish/unvanish — players believe you logged off
-- **Silent teleports while vanished** — no chat broadcast, no enderman sound, no particles
-- Join-race protected: players who log in while you're vanished still can't see you
+### Permissions and groups
+- Built-in permission engine: groups with inheritance, prefixes/suffixes,
+  per-user overrides
+- Dynamic nodes, e.g. `neoessentials.home.5` grants 5 homes (highest node wins)
+- Live reload: edit `permissions.json`, run `/permissions reload`, done
+- FTB Ranks adapter for modpack integrations
 
-### 🧑‍🤝‍🧑 Permissions & groups
-- Built-in permission engine — groups with inheritance, prefixes/suffixes, per-user overrides
-- Dynamic permission nodes (`home.5` = 5 homes, highest node wins)
-- Live reload: edit `permissions.json` → `/permissions reload` — no restart
-- FTB Ranks adapter for pack-side integrations
+### Teleportation
+- Homes with per-group limits, warps, `/spawn`, `/back`, `/rtp`, `/top`, `/jump`
+- TPA requests with accept/deny, plus silent admin teleports
+  (`/tpo`, `/tphere`, `/tpall`, `/tpoffline`)
+- Teleport sounds and particles for players; staff move silently
 
-### 🏠 Teleportation suite
-- Homes (per-group limits), warps, `/spawn`, `/back`, `/rtp`, `/top`, `/jump`
-- TPA requests (`/tpa`, `/tpahere`, accept/deny) + silent admin TPs (`/tpo`, `/tphere`, `/tpall`, `/tpoffline`)
-- Teleport effects (sounds/particles) for players, silent for staff
-
-### 🛡️ Moderation
-- Ban / tempban (durations) / ban-ip / kick / kickall — with reasons
-- Mute & unmute with reasons, mutelist
-- **Freeze** individual players or `/freezeall` the whole server
-- **Jail system** — `/setjail`, `/jail <player> [duration]`, `/jailinfo`, `/jaillist`
-- `/invsee` + `/enderchest` — live inventory GUIs (view or edit)
+### Moderation
+- Ban, tempban with durations, IP bans, kick, kickall — all with reasons
+- Mute/unmute, mute list
+- Freeze single players or the whole server (`/freezeall`)
+- Jails: `/setjail`, `/jail <player> [duration]`, `/jailinfo`, `/jaillist`
+- `/invsee` and `/enderchest` inventory GUIs (view or edit)
 - `/whois`, `/seen`, `/near`, `/realname`, `/sudo`
 
-### 💬 Chat
-- Group prefixes, colored/hex/rich-text chat (permission-gated), badges, channels
-- `/msg`, `/reply`, `/ignore`, social spy, helpop
-- AFK system: auto-detect, tab indicator, optional broadcasts & kick — all configurable
-- Animated or static tablist header/footer with placeholders (TPS, ping, balance, world)
+### Chat
+- Group prefixes, colored/hex/rich-text chat behind permissions, badges, channels
+- Private messages, replies, ignore, social spy, helpop
+- AFK detection with tab indicator; broadcasts and auto-kick are optional and
+  fully configurable
+- Tablist header/footer with placeholders (TPS, ping, balance, world), static
+  or animated
 
-### 🧰 Utility & QoL
-- Kits (create in-game, cooldowns, first-join starter kit)
+### Utility
+- Kits with cooldowns and a first-join starter kit, created in-game
 - Virtual workbenches: `/craft`, `/anvil`, `/grindstone`, `/smithing`, `/stonecutter`
 - `/hat`, `/repair`, `/heal`, `/feed`, `/ext`, `/speed`, `/ptime`, `/pweather`, `/nick`
-- Mail (incl. offline delivery + `sendall`), MOTD, rules, item customisation
-- Economy commands with external-economy bridging (EconomyCraft-aware tablist balance)
+- Mail with offline delivery and send-to-all, MOTD, rules, item customisation
+- Economy commands, with bridging to external economy mods where present
 
-### ⚙️ Ops-friendly by design
-- Split JSON configs (`config/neoessentials/*.json`) — one file per system
+### Operations
+- Split JSON configs under `config/neoessentials/`, one file per system
 - `neoe reload` reloads every system live
-- Per-change persistence — force-kills can't eat your homes
+- Player data persists per-change, so a hard kill cannot lose homes or settings
 
----
+## Installation
 
-## 📦 Installation
+Put the jar in the server's `mods/` folder. There is no client component.
+Configs generate under `config/neoessentials/` on first start.
 
-Drop the jar in `mods/` on the **server**. That's it — server-side only,
-vanilla clients connect fine. Configs generate under `config/neoessentials/` on first boot.
+## Building
 
-## 🔨 Building
+The project is currently maintained by surgical patching rather than a full
+gradle build — see [BUILDING.md](BUILDING.md). The `patches/` directory contains
+the per-version change history.
 
-This project is currently maintained via **surgical patching** — see [BUILDING.md](BUILDING.md).
-`patches/` holds the per-version change history from the NeoEssentials lineage.
+## Lineage and credits
 
-## 📜 Lineage & credits
+OP-Essentials started as a fork of NeoEssentials by ZeroG Network and has since
+diverged heavily (see [CHANGELOG.md](CHANGELOG.md)). Internal ids still use the
+`neoessentials` namespace; the full rename will land before any public release.
 
-OP-Essentials began as a fork of **NeoEssentials** (ZeroG Network) and has diverged
-heavily — 1,300+ commits and 8 private patch releases of fixes and new systems
-(see [CHANGELOG.md](CHANGELOG.md)). Internal ids still use `neoessentials`
-namespaces; the full rename ships before any public release.
-
-> ⚠️ **Before going public:** upstream license review required — portions of this
-> codebase derive from the original NeoEssentials sources.
-
----
-
-*Built with ❤️ (and a lot of 3am debugging) for the ATMOP Networks ATM10 server.*
+Note: before this repository goes public, the upstream license needs to be
+reviewed, since parts of the codebase derive from the original NeoEssentials
+sources.
