@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased (v0.2)
+## v0.2-beta (2026-07-13)
+First release carrying the OP-Essentials version scheme (`displayName` and
+`version` updated; the `neoessentials` mod id/package rename is still pending).
 - Removed `/god`. FTB Essentials registers its own `/god` and the two commands
   kept separate invincibility states, so players toggling one could be stuck
   invincible by the other. The fork's god mode is gone; FTB's is authoritative.
