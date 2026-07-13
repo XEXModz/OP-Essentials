@@ -33,7 +33,8 @@ public class PlayerStateCommands {
 
    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
       registerFly(dispatcher);
-      registerGod(dispatcher);
+      // /god intentionally not registered: FTB Essentials provides /god, and the
+      // two commands kept separate god states (players got stuck invincible).
       registerHeal(dispatcher);
       registerFeed(dispatcher);
       registerSpeed(dispatcher);
@@ -91,53 +92,6 @@ public class PlayerStateCommands {
          }
 
          LOGGER.info("{} set fly={} for {}", new Object[]{senderName(src), newState, target.getName().getString()});
-         return 1;
-      }
-   }
-
-   private static void registerGod(CommandDispatcher<CommandSourceStack> d) {
-      d.register(
-         (LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("god")
-                        .requires(src -> {
-                           ServerPlayer p = src.getPlayer();
-                           return p == null || PermissionAPI.hasPermission(p.getUUID(), "neoessentials.god");
-                        }))
-                     .executes(ctx -> executeGod(ctx, null, null)))
-                  .then(
-                     ((RequiredArgumentBuilder)((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("playername", StringArgumentType.word())
-                                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(((CommandSourceStack)ctx.getSource()).getServer().getPlayerNames(), b))
-                                 .requires(src -> src.getPlayer() == null || PermissionAPI.hasPermission(src.getPlayer().getUUID(), "neoessentials.god.others")))
-                              .executes(ctx -> executeGod(ctx, StringArgumentType.getString(ctx, "playername"), null)))
-                           .then(Commands.literal("on").executes(ctx -> executeGod(ctx, StringArgumentType.getString(ctx, "playername"), true))))
-                        .then(Commands.literal("off").executes(ctx -> executeGod(ctx, StringArgumentType.getString(ctx, "playername"), false)))
-                  ))
-               .then(Commands.literal("on").executes(ctx -> executeGod(ctx, null, true))))
-            .then(Commands.literal("off").executes(ctx -> executeGod(ctx, null, false)))
-      );
-   }
-
-   private static int executeGod(CommandContext<CommandSourceStack> ctx, String targetName, Boolean enable) {
-      CommandSourceStack src = (CommandSourceStack)ctx.getSource();
-      ServerPlayer target = resolveTarget(src, targetName);
-      if (target == null) {
-         return 0;
-      } else {
-         boolean cur = godMode.getOrDefault(target.getUUID(), false);
-         boolean newState = enable != null ? enable : !cur;
-         godMode.put(target.getUUID(), newState);
-         if (newState) {
-            target.setHealth(target.getMaxHealth());
-            target.getFoodData().setFoodLevel(20);
-         }
-
-         String state = newState ? "§aenabled" : "§cdisabled";
-         if (isOtherTarget(src, target)) {
-            src.sendSuccess(() -> MessageUtil.success("commands.neoessentials.god.other", target.getName().getString(), state), true);
-            target.sendSystemMessage(MessageUtil.info("commands.neoessentials.god.self", state));
-         } else {
-            src.sendSuccess(() -> MessageUtil.success("commands.neoessentials.god.self", state), false);
-         }
-
          return 1;
       }
    }

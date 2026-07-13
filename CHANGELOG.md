@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased (v0.2)
+- Removed `/god`. FTB Essentials registers its own `/god` and the two commands
+  kept separate invincibility states, so players toggling one could be stuck
+  invincible by the other. The fork's god mode is gone; FTB's is authoritative.
 - Fixed `/tpo` never running the teleport override: it was registered twice
   (DirectTeleportCommands and ServerAdminCommands), Brigadier merged the nodes and
   the first-registered offline-location variant shadowed the online override.
@@ -14,7 +17,6 @@ Identical code to lineage release `neoessentials-1.1.12-beta` — the version ru
 in production. From here the mod is its own project: **OP-Essentials**.
 
 ### Known issues (queued for v0.2)
-- `/god` should be removed (collides with FTB Essentials' `/god` when both installed)
 - Boot banner prints a stale hardcoded version string
 - Full `neoessentials` → `opessentials` id/package rename pending
 
