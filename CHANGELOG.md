@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased (v0.2)
+- Fixed `/tpo` never running the teleport override: it was registered twice
+  (DirectTeleportCommands and ServerAdminCommands), Brigadier merged the nodes and
+  the first-registered offline-location variant shadowed the online override.
+  Removed the duplicate — `/tpo` is now the online teleport override only; use
+  `/tpoffline` for last-known-location teleports (it already handled both cases).
+  Note: `/tpo` now checks `neoessentials.teleport.tpo` (the merged node previously
+  kept `neoessentials.teleport.admin.tpo` from the shadowing registration).
+
 ## v0.1-beta — the OP-Essentials rebrand (2026-07-12)
 Identical code to lineage release `neoessentials-1.1.12-beta` — the version running
 in production. From here the mod is its own project: **OP-Essentials**.

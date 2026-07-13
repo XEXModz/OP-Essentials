@@ -84,9 +84,10 @@ public class DirectTeleportCommands {
          registerTprCommand(dispatcher);
       }
 
-      if (config.isTeleportationEnabled() && config.isCommandEnabled("tpo")) {
-         registerTpoCommand(dispatcher);
-      }
+      // /tpo is registered by ServerAdminCommands (online teleport override).
+      // Registering a second "tpo" here merged into the same Brigadier node and
+      // shadowed it with an offline-location teleport; that behavior lives in
+      // /tpoffline instead.
    }
 
    private static void registerTpCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -249,21 +250,6 @@ public class DirectTeleportCommands {
                         : source.hasPermission(2)
                ))
             .then(Commands.argument("locationName", StringArgumentType.word()).executes(DirectTeleportCommands::setTprLocation))
-      );
-   }
-
-   private static void registerTpoCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
-      dispatcher.register(
-         (LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("tpo")
-               .requires(
-                  source -> source.getEntity() instanceof ServerPlayer p
-                        ? PermissionAPI.hasPermission(p.getUUID(), "neoessentials.teleport.admin.tpo")
-                        : source.hasPermission(2)
-               ))
-            .then(
-               Commands.argument("player", StringArgumentType.word())
-                  .executes(ctx -> teleportToOfflinePlayer(ctx, StringArgumentType.getString(ctx, "player")))
-            )
       );
    }
 
@@ -488,17 +474,4 @@ public class DirectTeleportCommands {
       }
    }
 
-   private static int teleportToOfflinePlayer(CommandContext<CommandSourceStack> ctx, String playerName) {
-      try {
-         ServerPlayer executor = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
-         boolean success = DirectTeleportManager.getInstance().teleportToOfflinePlayer(executor, playerName);
-         return success ? 1 : 0;
-      } catch (CommandSyntaxException var4) {
-         ((CommandSourceStack)ctx.getSource()).sendFailure(MessageUtil.error("commands.neoessentials.player_only"));
-         return 0;
-      } catch (Exception var5) {
-         ((CommandSourceStack)ctx.getSource()).sendFailure(MessageUtil.error("commands.neoessentials.teleport.admin.tpo_failed", var5.getMessage()));
-         return 0;
-      }
-   }
 }
