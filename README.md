@@ -14,6 +14,12 @@ Everything in here exists because our own server needed it. The mod runs in
 production on a public All The Mods 10 server, which is where most of the bug
 fixes in the changelog come from.
 
+> **Project status: beta.** v0.1 is pretty stable — it's the build running in
+> production — but a lot of the internals are still being reworked, so expect
+> things to change between releases. OP-Essentials is based on
+> [NeoEssentials](https://github.com/ZeroG-Network-PTY-LTD/NeoEssentials) by
+> ZeroG Network, the project it was forked from, and has grown from there.
+
 See [COMMANDS.md](COMMANDS.md) for the full command reference.
 
 ## Features
